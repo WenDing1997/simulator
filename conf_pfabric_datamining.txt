@@ -7,7 +7,7 @@ bandwidth: 40000000000.0
 queue_type: 2
 flow_type: 2
 num_flow: 1000000
-flow_trace: ././CDF_datamining.txt
+flow_trace: ./py/CDF_datamining.txt 
 cut_through: 1
 mean_flow_size: 0
 load_balancing: 0

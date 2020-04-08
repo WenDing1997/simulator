@@ -53,6 +53,12 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->first_byte_receive_time = -1;
     this->first_hop_departure = 0;
     this->last_hop_departure = 0;
+
+    // New fields for logging purposes
+    this->total_cwnd_mss= cwnd_mss;
+    this->cwnd_mss_count = 1;
+    this->avg_cwnd = cwnd_mss;
+    this->end_cwnd = cwnd_mss;
 }
 
 Flow::~Flow() {
@@ -63,10 +69,17 @@ void Flow::start_flow() {
     send_pending_data();
 }
 
+void Flow::compute_avg_cwnd(uint32_t cwnd_mss) {
+    cwnd_mss_count++;
+    avg_cwnd = total_cwnd_mss/cwnd_mss_count;
+    end_cwnd = cwnd_mss;
+}
+
 void Flow::send_pending_data() {
     if (received_bytes < size) {
         uint32_t seq = next_seq_no;
         uint32_t window = cwnd_mss * mss + scoreboard_sack_bytes;
+        compute_avg_cwnd(cwnd_mss);
         while (
             (seq + mss <= last_unacked_seq + window) &&
             ((seq + mss <= size) || (seq != size && (size - seq < mss)))

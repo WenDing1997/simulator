@@ -78,6 +78,20 @@ class Flow {
 
         uint32_t flow_priority;
         double deadline;
+
+
+        // New fields and functions for logging purposes
+        // To measure avg_cwnd: total_cwnd_mss/cwnd_mss_count, and end_cwnd
+        // Did I call compute_avg_cwnd in the right place in flow.cpp? Or inside while loop?
+        void compute_avg_cwnd(uint32_t cwnd_mss);
+        int cwnd_mss_count;
+        uint32_t total_cwnd_mss;
+        uint32_t avg_cwnd;
+        uint32_t end_cwnd;
+        // RTT: pkt send time + ack receive time
+        // the length of time it takes for a signal to be sent plus the length of time it takes for an acknowledgement of that signal to be received
+
+
 };
 
 #endif

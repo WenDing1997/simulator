@@ -183,7 +183,6 @@ void Flow::receive_ack(uint32_t ack, std::vector<uint32_t> sack_list) {
         received.clear();
         finish_time = get_current_time();
         flow_completion_time = finish_time - start_time;
-        printf("%f\n", flow_completion_time);
         FlowFinishedEvent *ev = new FlowFinishedEvent(get_current_time(), this);
         add_to_event_queue(ev);
     }
@@ -201,11 +200,9 @@ void Flow::receive(Packet *p) {
 
         // Compute RTT
         if (a->seq_no > last_unacked_seq) { // Why this condition??
-            double finish_time = get_current_time();
-            a->delivery_time_reverse_path = finish_time - a->sending_time;
-            printf("%f\n",a->delivery_time_reverse_path);
-            // this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
-            end_rtt = a->delivery_time_reverse_path;
+            a->delivery_time_reverse_path = get_current_time() - a->sending_time;
+            // printf("%f\n",a->delivery_time_reverse_path);
+            this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
             if (end_rtt > max_rtt) {
                 max_rtt = end_rtt;
             }
@@ -220,6 +217,8 @@ void Flow::receive(Packet *p) {
         if (this->first_byte_receive_time == -1) {
             this->first_byte_receive_time = get_current_time();
         }
+        printf("sending_time %f", p->sending_time);
+        printf("finish time %f", get_current_time());
         p->delivery_time_fwd_path = get_current_time() - p->sending_time;
         this->receive_data_pkt(p);
     }

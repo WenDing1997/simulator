@@ -2,6 +2,7 @@
 #include "../run/params.h"
 
 extern DCExpParams params;
+extern double get_current_time(); 
 uint32_t Packet::instance_count = 0;
 
 Packet::Packet(
@@ -37,6 +38,7 @@ PlainAck::PlainAck(Flow *flow, uint32_t seq_no_acked, uint32_t size, Host* src, 
 Ack::Ack(Flow *flow, uint32_t seq_no_acked, std::vector<uint32_t> sack_list, uint32_t size, Host* src, Host *dst) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {
     this->type = ACK_PACKET;
     this->sack_list = sack_list;
+    this->sending_time = get_current_time();
 }
 
 RTSCTS::RTSCTS(bool type, double sending_time, Flow *f, uint32_t size, Host *src, Host *dst) : Packet(sending_time, f, 0, 0, f->hdr_size, src, dst) {

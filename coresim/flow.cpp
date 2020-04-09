@@ -217,8 +217,8 @@ void Flow::receive(Packet *p) {
         if (this->first_byte_receive_time == -1) {
             this->first_byte_receive_time = get_current_time();
         }
-        printf("sending_time %f", p->sending_time);
-        printf("finish time %f", get_current_time());
+        // printf("sending_time %f", p->sending_time);
+        // printf("finish time %f", get_current_time());
         p->delivery_time_fwd_path = get_current_time() - p->sending_time;
         this->receive_data_pkt(p);
     }

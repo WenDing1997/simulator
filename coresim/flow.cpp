@@ -135,10 +135,10 @@ Packet *Flow::send(uint32_t seq) {
     return p;
 }
 
-// void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list) {
-//     Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
-//     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, dst->queue));
-// }
+void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list) {
+    Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
+    add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, dst->queue));
+}
 
 void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path) {
     Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src

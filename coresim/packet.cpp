@@ -37,6 +37,11 @@ PlainAck::PlainAck(Flow *flow, uint32_t seq_no_acked, uint32_t size, Host* src, 
 Ack::Ack(Flow *flow, uint32_t seq_no_acked, std::vector<uint32_t> sack_list, uint32_t size, Host* src, Host *dst, double delivert_time_fwd_path) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {
     this->type = ACK_PACKET;
     this->sack_list = sack_list;
+}
+
+Ack::Ack(Flow *flow, uint32_t seq_no_acked, std::vector<uint32_t> sack_list, uint32_t size, Host* src, Host *dst, double delivert_time_fwd_path) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {
+    this->type = ACK_PACKET;
+    this->sack_list = sack_list;
     this->delivery_time_fwd_path = delivery_time_fwd_path;
 }
 

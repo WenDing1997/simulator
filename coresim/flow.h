@@ -19,7 +19,7 @@ class Flow {
         virtual void start_flow();
         virtual void send_pending_data();
         virtual Packet *send(uint32_t seq);
-        // virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list);
+        virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list);
         virtual void receive_ack(uint32_t ack, std::vector<uint32_t> sack_list);
         void receive_data_pkt(Packet* p);
         virtual void receive(Packet *p);

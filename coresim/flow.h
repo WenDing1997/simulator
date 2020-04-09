@@ -19,7 +19,7 @@ class Flow {
         virtual void start_flow();
         virtual void send_pending_data();
         virtual Packet *send(uint32_t seq);
-        virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list);
+        // virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list);
         virtual void receive_ack(uint32_t ack, std::vector<uint32_t> sack_list);
         void receive_data_pkt(Packet* p);
         virtual void receive(Packet *p);
@@ -88,10 +88,18 @@ class Flow {
         uint32_t total_cwnd_mss;
         uint32_t avg_cwnd;
         uint32_t end_cwnd;
-        // RTT: pkt send time + ack receive time
-        // the length of time it takes for a signal to be sent plus the length of time it takes for an acknowledgement of that signal to be received
-
-
+        // To measure avg_rtt, max_rtt, end_rtt
+        // RTT: pkt_delivery_time_fwd_path + pkt_delivery_time_reverse_path
+        virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path);
+        double total_rtt; 
+        int rtt_count;
+        double avg_rtt;
+        double max_rtt;
+        double end_rtt;
+        // Remaining questions:
+        // 1 Time between when the dest receives the packet and when the dest sends ack?
+        // 2 Will adding code affect other calculations involving time?
+        // 3 ack > last_unacked_seq condition
 };
 
 #endif

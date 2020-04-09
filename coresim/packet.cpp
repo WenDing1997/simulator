@@ -24,15 +24,20 @@ Packet::Packet(
     this->type = NORMAL_PACKET;
     this->unique_id = Packet::instance_count++;
     this->total_queuing_delay = 0;
+
+    // New fields for logging purposes
+    this->delivery_time_fwd_path = 0;
+    this->delivery_time_reverse_path = 0;
 }
 
 PlainAck::PlainAck(Flow *flow, uint32_t seq_no_acked, uint32_t size, Host* src, Host *dst) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {
     this->type = ACK_PACKET;
 }
 
-Ack::Ack(Flow *flow, uint32_t seq_no_acked, std::vector<uint32_t> sack_list, uint32_t size, Host* src, Host *dst) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {
+Ack::Ack(Flow *flow, uint32_t seq_no_acked, std::vector<uint32_t> sack_list, uint32_t size, Host* src, Host *dst, double delivert_time_fwd_path) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {
     this->type = ACK_PACKET;
     this->sack_list = sack_list;
+    this->delivery_time_fwd_path = delivery_time_fwd_path;
 }
 
 RTSCTS::RTSCTS(bool type, double sending_time, Flow *f, uint32_t size, Host *src, Host *dst) : Packet(sending_time, f, 0, 0, f->hdr_size, src, dst) {

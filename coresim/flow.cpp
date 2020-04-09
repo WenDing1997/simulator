@@ -59,6 +59,11 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->cwnd_mss_count = 1;
     this->avg_cwnd = cwnd_mss;
     this->end_cwnd = cwnd_mss;
+    this->total_rtt = 0;
+    this->rtt_count = 0;
+    this->avg_rtt = 0;
+    this->max_rtt = 0;
+    this->end_rtt = 0;
 }
 
 Flow::~Flow() {
@@ -130,8 +135,13 @@ Packet *Flow::send(uint32_t seq) {
     return p;
 }
 
-void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list) {
-    Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
+// void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list) {
+//     Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
+//     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, dst->queue));
+// }
+
+void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path) {
+    Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src, delivery_time_fwd_path); //Acks are dst->src
     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, dst->queue));
 }
 
@@ -186,12 +196,26 @@ void Flow::receive(Packet *p) {
 
     if (p->type == ACK_PACKET) {
         Ack *a = (Ack *) p;
+
+        // Compute RTT
+        if (a->seq_no > last_unacked_seq) { // Why this condition??
+            a->delivery_time_reverse_path = get_current_time() - p->sending_time;
+            this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
+            if (end_rtt > max_rtt) {
+                max_rtt = end_rtt;
+            }
+            this->total_rtt += end_rtt;
+            this->rtt_count += 1;
+            this->avg_rtt = total_rtt / rtt_count;
+        }
+
         receive_ack(a->seq_no, a->sack_list);
     }
     else if(p->type == NORMAL_PACKET) {
         if (this->first_byte_receive_time == -1) {
             this->first_byte_receive_time = get_current_time();
         }
+        p->delivery_time_fwd_path = get_current_time() - p->sending_time;
         this->receive_data_pkt(p);
     }
     else {
@@ -239,7 +263,8 @@ void Flow::receive_data_pkt(Packet* p) {
         s += mss;
     }
 
-    send_ack(recv_till, sack_list); // Cumulative Ack
+    // send_ack(recv_till, sack_list); // Cumulative Ack
+    send_ack(recv_till, sack_list, p->delivery_time_fwd_path);
 }
 
 void Flow::set_timeout(double time) {

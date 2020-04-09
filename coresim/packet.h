@@ -42,6 +42,10 @@ class Packet {
         double last_enque_time;
 
         int capa_data_seq;
+
+        // New fields for logging purposes
+        double delivery_time_fwd_path;
+        double delivery_time_reverse_path;
 };
 
 class PlainAck : public Packet {
@@ -53,7 +57,7 @@ class Ack : public Packet {
     public:
         Ack(Flow *flow, uint32_t seq_no_acked, std::vector<uint32_t> sack_list,
                 uint32_t size,
-                Host* src, Host *dst);
+                Host* src, Host *dst, double delivert_time_fwd_path);
         uint32_t sack_bytes;
         std::vector<uint32_t> sack_list;
 };

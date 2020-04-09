@@ -200,7 +200,8 @@ void Flow::receive(Packet *p) {
 
         // Compute RTT
         if (a->seq_no > last_unacked_seq) { // Why this condition??
-            a->delivery_time_reverse_path = get_current_time() - a->sending_time;
+            double finish_time = get_current_time();
+            a->delivery_time_reverse_path = finish_time - a->sending_time;
             printf("%f\n",a->delivery_time_reverse_path);
             // this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
             end_rtt = a->delivery_time_reverse_path;

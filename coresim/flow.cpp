@@ -76,8 +76,9 @@ void Flow::start_flow() {
 
 void Flow::compute_avg_cwnd(uint32_t cwnd_mss) {
     cwnd_mss_count++;
-    avg_cwnd = total_cwnd_mss/cwnd_mss_count;
+    total_cwnd_mss += cwnd_mss_count;
     end_cwnd = cwnd_mss;
+    avg_cwnd = total_cwnd_mss/cwnd_mss_count;
 }
 
 void Flow::send_pending_data() {
@@ -140,6 +141,7 @@ void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list) {
     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, dst->queue));
 }
 
+// Overload send_ack for logging purposes
 void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path) {
     Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
     p->delivery_time_fwd_path = delivery_time_fwd_path;
@@ -201,7 +203,6 @@ void Flow::receive(Packet *p) {
         // Compute RTT
         if (a->seq_no > last_unacked_seq) { // Why this condition??
             a->delivery_time_reverse_path = get_current_time() - a->sending_time;
-            // printf("%f\n",a->delivery_time_reverse_path);
             this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
             if (end_rtt > max_rtt) {
                 max_rtt = end_rtt;
@@ -217,8 +218,6 @@ void Flow::receive(Packet *p) {
         if (this->first_byte_receive_time == -1) {
             this->first_byte_receive_time = get_current_time();
         }
-        // printf("sending_time %f", p->sending_time);
-        // printf("finish time %f", get_current_time());
         p->delivery_time_fwd_path = get_current_time() - p->sending_time;
         this->receive_data_pkt(p);
     }

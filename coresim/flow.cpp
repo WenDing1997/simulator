@@ -183,6 +183,7 @@ void Flow::receive_ack(uint32_t ack, std::vector<uint32_t> sack_list) {
         received.clear();
         finish_time = get_current_time();
         flow_completion_time = finish_time - start_time;
+        printf("%f\n", flow_completion_time);
         FlowFinishedEvent *ev = new FlowFinishedEvent(get_current_time(), this);
         add_to_event_queue(ev);
     }

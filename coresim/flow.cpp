@@ -55,10 +55,10 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->last_hop_departure = 0;
 
     // New fields for logging purposes
-    this->total_cwnd_mss= cwnd_mss;
-    this->cwnd_mss_count = 1;
-    this->avg_cwnd = cwnd_mss;
-    this->end_cwnd = cwnd_mss;
+    this->total_cwnd_mss= 0;
+    this->cwnd_mss_count = 0;
+    this->avg_cwnd = 0;
+    this->end_cwnd = 0;
     this->total_rtt = 0;
     this->rtt_count = 0;
     this->avg_rtt = 0;
@@ -76,7 +76,7 @@ void Flow::start_flow() {
 
 void Flow::compute_avg_cwnd(uint32_t cwnd_mss) {
     cwnd_mss_count++;
-    total_cwnd_mss += cwnd_mss_count;
+    total_cwnd_mss += cwnd_mss;
     end_cwnd = cwnd_mss;
     avg_cwnd = total_cwnd_mss/cwnd_mss_count;
 }
@@ -85,7 +85,7 @@ void Flow::send_pending_data() {
     if (received_bytes < size) {
         uint32_t seq = next_seq_no;
         uint32_t window = cwnd_mss * mss + scoreboard_sack_bytes;
-        compute_avg_cwnd(cwnd_mss);
+        //compute_avg_cwnd(cwnd_mss);
         while (
             (seq + mss <= last_unacked_seq + window) &&
             ((seq + mss <= size) || (seq != size && (size - seq < mss)))
@@ -133,6 +133,7 @@ Packet *Flow::send(uint32_t seq) {
     this->total_pkt_sent++;
 
     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, src->queue));
+    compute_avg_cwnd(cwnd_mss);
     return p;
 }
 

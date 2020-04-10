@@ -192,6 +192,7 @@ void Flow::receive_ack(uint32_t ack, std::vector<uint32_t> sack_list) {
     }
 
     if (ack == size && !finished) {
+        nactv_flows--;
         nactv_flows_when_finished = nactv_flows;
         finished = true;
         received.clear();

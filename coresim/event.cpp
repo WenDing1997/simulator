@@ -330,9 +330,9 @@ void FlowFinishedEvent::process_event() {
             << "avg_rtt " << 1000000 * flow->avg_rtt << " "
             << "max_rtt " << 1000000 * flow->max_rtt << " "
             << "end_rtt " << 1000000 * flow->end_rtt << " "
-            << "nactv_flows_when_finished" << flow->nactv_flows_when_finished << " "
-            << "last_byte_send_time" << flow->last_byte_send_time << " "
-            << "last_byte_rcvd_time" << flow->last_byte_rcvd_time << " "
+            << "nactv_flows_when_finished " << flow->nactv_flows_when_finished << " "
+            << "last_byte_send_time " << 1000000 * flow->last_byte_send_time << " "
+            << "last_byte_rcvd_time " << 1000000 * flow->last_byte_rcvd_time << " "
             << std::endl;
         std::cout << std::setprecision(9) << std::fixed;
     }

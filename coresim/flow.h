@@ -82,8 +82,7 @@ class Flow {
 
         // New fields and functions for logging purposes
         // To measure avg_cwnd: total_cwnd_mss/cwnd_mss_count, and end_cwnd
-        // Did I call compute_avg_cwnd in the right place in flow.cpp? Or inside while loop?
-        void compute_avg_cwnd(uint32_t cwnd_mss);
+        void compute_avg_cwnd(uint32_t cwnd_mss); // Did I call compute_avg_cwnd in the right place in flow.cpp? I called in send().
         int cwnd_mss_count;
         uint32_t total_cwnd_mss;
         uint32_t avg_cwnd;
@@ -91,15 +90,23 @@ class Flow {
         // To measure avg_rtt, max_rtt, end_rtt
         // RTT: pkt_delivery_time_fwd_path + pkt_delivery_time_reverse_path
         virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path);
-        double total_rtt; 
+        double total_rtt; // I think I need ack > last_unacked_seq condition?
         int rtt_count;
         double avg_rtt;
         double max_rtt;
         double end_rtt;
+        // To measure nactv_flows
+
+
+        // To mmeasure last_byte_send_time, last_byte_rcvd_time
+        // Assuming we're only talking about data pkt, not ack pkt
+        double last_byte_send_time;
+        double last_byte_rcvd_time;
+
         // Remaining questions:
         // 1 Time between when the dest receives the packet and when the dest sends ack?
         // 2 Will adding code affect other calculations involving time?
-        // 3 ack > last_unacked_seq condition
+        
 };
 
 #endif

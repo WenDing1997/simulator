@@ -64,6 +64,8 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->avg_rtt = 0;
     this->max_rtt = 0;
     this->end_rtt = 0;
+    this->last_byte_send_time = 0;
+    this->last_byte_rcvd_time = 0;
 }
 
 Flow::~Flow() {
@@ -134,6 +136,9 @@ Packet *Flow::send(uint32_t seq) {
 
     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, src->queue));
     compute_avg_cwnd(cwnd_mss);
+    if (p->sending_time > last_byte_send_time) {
+        last_byte_send_time = p->sending_time;
+    }
     return p;
 }
 
@@ -198,12 +203,13 @@ void Flow::receive(Packet *p) {
         return;
     }
 
+    double recieved_time = get_current_time();
     if (p->type == ACK_PACKET) {
         Ack *a = (Ack *) p;
 
         // Compute RTT
         if (a->seq_no > last_unacked_seq) { // Why this condition??
-            a->delivery_time_reverse_path = get_current_time() - a->sending_time;
+            a->delivery_time_reverse_path = recieved_time - a->sending_time;
             this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
             if (end_rtt > max_rtt) {
                 max_rtt = end_rtt;
@@ -219,7 +225,10 @@ void Flow::receive(Packet *p) {
         if (this->first_byte_receive_time == -1) {
             this->first_byte_receive_time = get_current_time();
         }
-        p->delivery_time_fwd_path = get_current_time() - p->sending_time;
+        p->delivery_time_fwd_path = recieved_time - p->sending_time;
+        if (recieved_time > last_byte_rcvd_time) {
+            last_byte_rcvd_time = recieved_time;
+        }
         this->receive_data_pkt(p);
     }
     else {

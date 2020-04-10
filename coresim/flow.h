@@ -90,14 +90,13 @@ class Flow {
         // To measure avg_rtt, max_rtt, end_rtt
         // RTT: pkt_delivery_time_fwd_path + pkt_delivery_time_reverse_path
         virtual void send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path);
-        double total_rtt; // I think I need ack > last_unacked_seq condition?
+        double total_rtt; // I think I need ack > last_unacked_seq condition in receive()?
         int rtt_count;
         double avg_rtt;
         double max_rtt;
         double end_rtt;
         // To measure nactv_flows
         uint32_t nactv_flows_when_finished;
-
         // To mmeasure last_byte_send_time, last_byte_rcvd_time
         // Assuming we're only talking about data pkt, not ack pkt
         double last_byte_send_time;

@@ -96,7 +96,7 @@ class Flow {
         double max_rtt;
         double end_rtt;
         // To measure nactv_flows
-
+        uint32_t nactv_flows_when_finished;
 
         // To mmeasure last_byte_send_time, last_byte_rcvd_time
         // Assuming we're only talking about data pkt, not ack pkt

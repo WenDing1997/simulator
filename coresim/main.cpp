@@ -47,6 +47,9 @@ uint32_t backlog4 = 0;
 uint32_t total_completed_packets = 0;
 uint32_t sent_packets = 0;
 
+// For logging purposes
+uint32_t nactv_flows = 0;
+
 extern DCExpParams params;
 double start_time = -1;
 

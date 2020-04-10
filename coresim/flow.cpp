@@ -16,6 +16,9 @@ extern uint32_t num_outstanding_packets;
 extern uint32_t max_outstanding_packets;
 extern uint32_t duplicated_packets_received;
 
+// For logging purposes
+extern uint32_t nactv_flows;
+
 Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->id = id;
     this->start_time = start_time;
@@ -64,6 +67,7 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->avg_rtt = 0;
     this->max_rtt = 0;
     this->end_rtt = 0;
+    this->nactv_flows_when_finished = 0;
     this->last_byte_send_time = 0;
     this->last_byte_rcvd_time = 0;
 }
@@ -73,6 +77,7 @@ Flow::~Flow() {
 }
 
 void Flow::start_flow() {
+    nactv_flows += 1;
     send_pending_data();
 }
 
@@ -187,6 +192,7 @@ void Flow::receive_ack(uint32_t ack, std::vector<uint32_t> sack_list) {
     }
 
     if (ack == size && !finished) {
+        nactv_flows_when_finished = nactv_flows;
         finished = true;
         received.clear();
         finish_time = get_current_time();

@@ -46,6 +46,7 @@ class Packet {
         // New fields for logging purposes
         double delivery_time_fwd_path;
         double delivery_time_reverse_path;
+        double fwd_path_start_time;
 };
 
 class PlainAck : public Packet {

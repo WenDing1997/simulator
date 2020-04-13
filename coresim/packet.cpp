@@ -29,6 +29,8 @@ Packet::Packet(
     // New fields for logging purposes
     this->delivery_time_fwd_path = 0;
     this->delivery_time_reverse_path = 0;
+    this->fwd_path_start_time = 0;
+    
 }
 
 PlainAck::PlainAck(Flow *flow, uint32_t seq_no_acked, uint32_t size, Host* src, Host *dst) : Packet(0, flow, seq_no_acked, 0, size, src, dst) {

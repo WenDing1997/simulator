@@ -62,6 +62,7 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->cwnd_mss_count = 0;
     this->avg_cwnd = 0;
     this->end_cwnd = 0;
+    this->size_in_pkts = size / mss;
     this->total_rtt = 0;
     this->rtt_count = 0;
     this->avg_rtt = 0;
@@ -84,8 +85,9 @@ void Flow::start_flow() {
 void Flow::compute_avg_cwnd(uint32_t cwnd_mss) {
     cwnd_mss_count++;
     total_cwnd_mss += cwnd_mss;
-    end_cwnd = cwnd_mss;
+    end_cwnd = cwnd_mss < size_in_pkts ? cwnd_mss : size_in_pkts;
     avg_cwnd = total_cwnd_mss/cwnd_mss_count;
+    avg_cwnd = avg_cwnd < size_in_pkts ? avg_cwnd : size_in_pkts;
 }
 
 void Flow::send_pending_data() {
@@ -153,10 +155,11 @@ void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list) {
 }
 
 // Overload send_ack for logging purposes
-void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list, double delivery_time_fwd_path) {
-    Packet *p = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
-    p->delivery_time_fwd_path = delivery_time_fwd_path;
-    add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, dst->queue));
+void Flow::send_ack(uint32_t seq, std::vector<uint32_t> sack_list, Packet* p) {
+    Packet *a = new Ack(this, seq, sack_list, hdr_size, dst, src); //Acks are dst->src
+    a->delivery_time_fwd_path = p->delivery_time_fwd_path;
+    a->fwd_path_start_time = p->sending_time;
+    add_to_event_queue(new PacketQueuingEvent(get_current_time(), a, dst->queue));
 }
 
 void Flow::receive_ack(uint32_t ack, std::vector<uint32_t> sack_list) {
@@ -217,7 +220,8 @@ void Flow::receive(Packet *p) {
         // Compute RTT
         if (a->seq_no > last_unacked_seq) { // Why this condition??
             a->delivery_time_reverse_path = recieved_time - a->sending_time;
-            this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path;
+            // this->end_rtt = a->delivery_time_fwd_path + a->delivery_time_reverse_path; // doesn't include time reciever spent processing pkt, i.e. time between pkt is recieved and ack is sent
+            this->end_rtt = recieved_time - a->fwd_path_start_time; // includes time mentioned in comments above
             if (end_rtt > max_rtt) {
                 max_rtt = end_rtt;
             }
@@ -284,7 +288,7 @@ void Flow::receive_data_pkt(Packet* p) {
     }
 
     // send_ack(recv_till, sack_list); // Cumulative Ack
-    send_ack(recv_till, sack_list, p->delivery_time_fwd_path);
+    send_ack(recv_till, sack_list, p);
 }
 
 void Flow::set_timeout(double time) {

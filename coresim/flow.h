@@ -87,6 +87,7 @@ class Flow {
         uint32_t total_cwnd_mss;
         uint32_t avg_cwnd;
         uint32_t end_cwnd;
+        uint32_t max_cwnd_during_flow;
         uint32_t size_in_pkts;
         // To measure avg_rtt, max_rtt, end_rtt
         // RTT: pkt_delivery_time_fwd_path + pkt_delivery_time_reverse_path
@@ -102,6 +103,8 @@ class Flow {
         // Assuming we're only talking about data pkt, not ack pkt
         double last_byte_send_time;
         double last_byte_rcvd_time;
+
+        
 
         
 };

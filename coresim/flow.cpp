@@ -68,6 +68,7 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->avg_rtt = 0;
     this->max_rtt = 0;
     this->end_rtt = 0;
+    this->max_cwnd_during_flow = 0;
     this->nactv_flows_when_finished = 0;
     this->last_byte_send_time = 0;
     this->last_byte_rcvd_time = 0;
@@ -86,6 +87,9 @@ void Flow::compute_avg_cwnd(uint32_t cwnd_mss) {
     cwnd_mss_count++;
     total_cwnd_mss += cwnd_mss;
     end_cwnd = cwnd_mss < size_in_pkts ? cwnd_mss : size_in_pkts;
+    if (end_cwnd > max_cwnd_during_flow) {
+        max_cwnd_during_flow = end_cwnd;
+    }
     avg_cwnd = total_cwnd_mss/cwnd_mss_count;
     avg_cwnd = avg_cwnd < size_in_pkts ? avg_cwnd : size_in_pkts;
 }

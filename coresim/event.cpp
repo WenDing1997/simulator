@@ -323,8 +323,6 @@ void FlowFinishedEvent::process_event() {
             << flow->init_seq << " "
             << flow->end_seq << " "
             << flow->bytes_sent << " "
-            << flow->next_seq_no << " "
-            << flow->last_unacked_seq << " "
             << flow->received_bytes << " "
             << flow->total_pkt_sent << " "
             << flow->received_count << " "

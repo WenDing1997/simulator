@@ -156,7 +156,7 @@ Packet *Flow::send(uint32_t seq) {
         init_seq = seq;
     }
     end_seq = seq;
-    bytes_sent += pkt_size;
+    bytes_sent += pkt_size - hdr_size;
 
     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, src->queue));
     compute_avg_cwnd(cwnd_mss);
@@ -307,7 +307,7 @@ void Flow::receive_data_pkt(Packet* p) {
 
     // send_ack(recv_till, sack_list); // Cumulative Ack
     nack_pkts++;
-    nack_bytes += p->size;
+    nack_bytes += p->size - hdr_size;
     send_ack(recv_till, sack_list, p);
 }
 

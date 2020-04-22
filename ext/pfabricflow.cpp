@@ -27,6 +27,7 @@ void PFabricFlow::increase_cwnd() {
 }
 
 void PFabricFlow::handle_timeout() {
+    tot_cwnd_cuts++;
     ssthresh = cwnd_mss / 2;
     if (ssthresh < 2) {
         ssthresh = 2;

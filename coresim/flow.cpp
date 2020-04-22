@@ -72,6 +72,14 @@ Flow::Flow(uint32_t id, double start_time, uint32_t size, Host *s, Host *d) {
     this->nactv_flows_when_finished = 0;
     this->last_byte_send_time = 0;
     this->last_byte_rcvd_time = 0;
+    this->init_seq = 0;
+    this->end_seq = 0;
+    this->bytes_sent = 0;
+    this->nack_pkts = 0;
+    this->nack_bytes = 0;
+    this->tot_cwnd_cuts = 0;
+    this->nrexmit = 0;
+    this->ndup_acks = 0;
 }
 
 Flow::~Flow() {
@@ -144,6 +152,11 @@ Packet *Flow::send(uint32_t seq) {
             dst
             );
     this->total_pkt_sent++;
+    if (init_seq == 0) {
+        init_seq = seq;
+    }
+    end_seq = seq;
+    bytes_sent += pkt_size;
 
     add_to_event_queue(new PacketQueuingEvent(get_current_time(), p, src->queue));
     compute_avg_cwnd(cwnd_mss);
@@ -266,6 +279,7 @@ void Flow::receive_data_pkt(Packet* p) {
         received_bytes += (p->size - hdr_size);
     } else {
         duplicated_packets_received += 1;
+        ndup_acks += 1;
     }
     if (p->seq_no > max_seq_no_recv) {
         max_seq_no_recv = p->seq_no;
@@ -292,6 +306,8 @@ void Flow::receive_data_pkt(Packet* p) {
     }
 
     // send_ack(recv_till, sack_list); // Cumulative Ack
+    nack_pkts++;
+    nack_bytes += p->size;
     send_ack(recv_till, sack_list, p);
 }
 
@@ -305,6 +321,7 @@ void Flow::set_timeout(double time) {
 
 
 void Flow::handle_timeout() {
+    nrexmit++;
     next_seq_no = last_unacked_seq;
     //Reset congestion window to 1
     cwnd_mss = 1;

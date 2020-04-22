@@ -104,7 +104,15 @@ class Flow {
         double last_byte_send_time;
         double last_byte_rcvd_time;
 
-        
+        uint32_t init_seq;
+        uint32_t end_seq;
+        uint32_t bytes_sent;
+        uint32_t nack_pkts;
+        uint32_t nack_bytes;
+        uint32_t tot_cwnd_cuts;
+        uint32_t nrexmit;
+        uint32_t ndup_acks;
+
 
         
 };

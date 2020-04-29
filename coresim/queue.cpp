@@ -14,6 +14,7 @@ extern double get_current_time(); // TODOm
 extern void add_to_event_queue(Event* ev);
 extern uint32_t dead_packets;
 extern DCExpParams params;
+extern uint32_t nactv_flows;
 
 uint32_t Queue::instance_count = 0;
 
@@ -52,11 +53,35 @@ Queue::Queue(uint32_t id, double rate, uint32_t limit_bytes, int location) {
     this->pkt_drop = 0;
     this->spray_counter=std::rand();
     this->packet_transmitting = NULL;
+
+    // For qnetlog.txt
+    this->bdropped = 0;
+    this->pkts_in_queue = 0;
+    this->new_measurement = true;
+    this->qsize_min_p = 0;
+    this->qsize_max_p = 0;
+    this->qsize_min_b = 0;
+    this->qsize_max_b = 0;
 }
 
 void Queue::set_src_dst(Node *src, Node *dst) {
     this->src = src;
     this->dst = dst;
+}
+
+void Queue::update_qsize_measurements() {
+    if (new_measurement) {
+        new_measurement = false;
+        qsize_min_p = pkts_in_queue;
+        qsize_max_p = pkts_in_queue;
+        qsize_min_b = bytes_in_queue;
+        qsize_max_b = bytes_in_queue;
+    } else {
+        qsize_min_p = pkts_in_queue < qsize_min_p ? pkts_in_queue : qsize_min_p;
+        qsize_max_p = pkts_in_queue > qsize_max_p ? pkts_in_queue : qsize_max_p;
+        qsize_min_b = bytes_in_queue < qsize_min_b ? bytes_in_queue : qsize_min_b;
+        qsize_max_b = bytes_in_queue > qsize_max_b ? bytes_in_queue : qsize_max_b;
+    }
 }
 
 void Queue::enque(Packet *packet) {
@@ -65,8 +90,11 @@ void Queue::enque(Packet *packet) {
     if (bytes_in_queue + packet->size <= limit_bytes) {
         packets.push_back(packet);
         bytes_in_queue += packet->size;
+        pkts_in_queue++;
+        update_qsize_measurements();
     } else {
         pkt_drop++;
+        bdropped += packet->size;
         drop(packet);
     }
 }
@@ -76,6 +104,8 @@ Packet *Queue::deque() {
         Packet *p = packets.front();
         packets.pop_front();
         bytes_in_queue -= p->size;
+        pkts_in_queue--;
+        update_qsize_measurements();
         p_departures += 1;
         b_departures += p->size;
         return p;
@@ -122,6 +152,8 @@ void Queue::preempt_current_transmission() {
         }
         if(found){
             bytes_in_queue -= packet_transmitting->size;
+            pkts_in_queue--;
+            update_qsize_measurements();
             packets.erase(packets.begin() + delete_index);
         }
 
@@ -155,6 +187,8 @@ void ProbDropQueue::enque(Packet *packet) {
         }
         packets.push_back(packet);
         bytes_in_queue += packet->size;
+        pkts_in_queue++;
+        update_qsize_measurements();
         if (!busy) {
             add_to_event_queue(new QueueProcessingEvent(get_current_time(), this));
             this->busy = true;

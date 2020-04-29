@@ -51,6 +51,14 @@ class Queue {
         uint64_t spray_counter;
 
         int location;
+
+        // For qnetlog.txt
+        uint64_t bdropped;
+        uint64_t pkts_in_queue;
+        bool new_measurement;
+        uint64_t qsize_min_p, qsize_max_p;
+        uint64_t qsize_min_b, qsize_max_b;
+        void update_qsize_measurements();
 };
 
 

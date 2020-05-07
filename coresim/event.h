@@ -131,6 +131,44 @@ class LoggingEvent : public Event {
         double ttl;
 };
 
+class QueueLoggingEvent : public Event {
+    public:
+        QueueLoggingEvent(
+            double time,
+            uint32_t id, // id or unique_id?
+            uint32_t unique_id,
+            uint64_t parrivals,
+            uint64_t pdropped,
+            uint64_t pdeparted,
+            uint64_t barrivals,
+            uint64_t bdropped,
+            uint64_t bdeparted,
+            uint64_t qsize_min_p,
+            uint64_t qsize_max_p,
+            uint64_t qsize_min_b,
+            uint64_t qsize_max_b,
+            int qlevel,
+            uint32_t nactive_flows
+            );
+        ~QueueLoggingEvent();
+        void process_event();
+        double time;
+        uint32_t id; // id or unique_id?
+        uint32_t unique_id;
+        uint64_t parrivals;
+        uint64_t pdropped;
+        uint64_t pdeparted;
+        uint64_t barrivals;
+        uint64_t bdropped;
+        uint64_t bdeparted;
+        uint64_t qsize_min_p;
+        uint64_t qsize_max_p;
+        uint64_t qsize_min_b;
+        uint64_t qsize_max_b;
+        int qlevel;
+        uint32_t nactive_flows;
+};
+
 //A flow finished event
 class FlowFinishedEvent : public Event {
     public:

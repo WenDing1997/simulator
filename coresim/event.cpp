@@ -17,6 +17,9 @@
 
 #include "../run/params.h"
 
+#include <fstream>
+
+
 extern Topology* topology;
 extern std::priority_queue<Event*, std::vector<Event*>, EventComparator> event_queue;
 extern double current_time;
@@ -285,8 +288,44 @@ LoggingEvent::~LoggingEvent() {
 void LoggingEvent::process_event() {
     double current_time = get_current_time();
     // can log simulator statistics here.
+
 }
 
+QueueLoggingEvent::QueueLoggingEvent (
+    double time, uint32_t id, uint32_t unique_id, uint64_t parrivals, uint64_t pdropped,
+    uint64_t pdeparted, uint64_t barrivals, uint64_t bdropped, uint64_t bdeparted,
+    uint64_t qsize_min_p,uint64_t qsize_max_p, uint64_t qsize_min_b,
+    uint64_t qsize_max_b, int qlevel, uint32_t nactive_flows) 
+    : Event(LOGGING, time) {
+        this->time = time;
+        this->id = id;
+        this->unique_id = unique_id;
+        this->parrivals = parrivals;
+        this->pdropped = pdropped;
+        this->pdeparted = pdeparted;
+        this->barrivals = barrivals;
+        this->bdropped = bdropped;
+        this->bdeparted = bdeparted;
+        this->qsize_min_p = qsize_min_p;
+        this->qsize_max_p = qsize_max_p;
+        this->qsize_min_b = qsize_min_b;
+        this->qsize_max_b = qsize_max_b;
+        this->qlevel = qlevel;
+        this->nactive_flows = nactive_flows;
+}
+
+QueueLoggingEvent::~QueueLoggingEvent() {
+}
+
+void QueueLoggingEvent::process_event() {
+    std::fstream qnetlog;
+    qnetlog.open("qnetlog.txt", std::ios::app); // need to manually delete qlognet.txt each time
+    
+    qnetlog << time << " " << id << " " << unique_id << " " << parrivals << " " << pdropped << " " <<
+    pdeparted << " " << barrivals << " " << bdropped << " " << pdeparted << " " <<
+    qsize_min_p << " " << qsize_max_p << " " << qsize_min_b << " " << qsize_max_b << " " <<
+    qlevel << " " << nactive_flows << "\n"; 
+}
 
 /* Flow Finished */
 FlowFinishedEvent::FlowFinishedEvent(double time, Flow *flow)

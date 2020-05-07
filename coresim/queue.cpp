@@ -62,6 +62,9 @@ Queue::Queue(uint32_t id, double rate, uint32_t limit_bytes, int location) {
     this->qsize_max_p = 0;
     this->qsize_min_b = 0;
     this->qsize_max_b = 0;
+    this->qlevel = 0;
+    this->last_measurement_time = get_current_time();
+    this->measurement_interval = 0.0001; // in us
 }
 
 void Queue::set_src_dst(Node *src, Node *dst) {
@@ -97,6 +100,15 @@ void Queue::enque(Packet *packet) {
         bdropped += packet->size;
         drop(packet);
     }
+
+//    if (get_current_time() - last_measurement_time > measurement_interval) {
+//         new_measurement = true;
+//         last_measurement_time = get_current_time();
+//         add_to_event_queue(new QueueLoggingEvent(
+//             get_current_time(), id, p_arrivals, pkt_drop, p_departures, b_arrivals,
+//             bdropped, b_departures, qsize_min_p, qsize_max_p, qsize_min_b, qsize_max_b,
+//             0, nactv_flows));
+//     }
 }
 
 Packet *Queue::deque() {

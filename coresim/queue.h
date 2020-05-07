@@ -59,6 +59,9 @@ class Queue {
         uint64_t qsize_min_p, qsize_max_p;
         uint64_t qsize_min_b, qsize_max_b;
         void update_qsize_measurements();
+        int qlevel; // Remains 0 because nonexistent in YAPS
+        double measurement_interval;
+        double last_measurement_time;
 };
 
 
